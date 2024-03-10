@@ -8,6 +8,7 @@ import 'package:safety_app/utils/ui_theme_extension.dart';
 import 'package:safety_app/widgets/emergency.dart';
 import 'package:safety_app/widgets/explore.dart';
 import 'package:safety_app/widgets/life_safe.dart';
+import 'package:safety_app/widgets/send_location.dart';
 
 import '../utils/quotes.dart';
 
@@ -78,10 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     SizedBox(height: screenHeight*0.03,),
                     const ExploreWidget(),
-                    SizedBox(height: screenHeight*0.03,),
+                    SizedBox(height: screenHeight*0.01,),
                     const EmergencyWidget(),
-                    SizedBox(height: screenHeight*0.03,),
+                    SizedBox(height: screenHeight*0.01,),
                     const LifeSafeWidget(),
+                    const SendLocation()
                   ],
                 ),
               )
