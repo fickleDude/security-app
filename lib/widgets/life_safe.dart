@@ -13,7 +13,7 @@ class LifeSafeWidget extends StatelessWidget {
       children: [
         Padding(
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-            child: Text('EXPLORE LIFE SAFE', style: context.prT2)),
+            child: Text('LIFE SAFE', style: context.prT2)),
         SizedBox(
           height: 90,
           width: MediaQuery.of(context).size.width,

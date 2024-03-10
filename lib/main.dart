@@ -17,7 +17,7 @@ void main() async{
 
 GoRouter router() {
   return GoRouter(
-    initialLocation: '/welcome',
+    initialLocation: '/home',
     routes: [
       GoRoute(
           path: '/welcome',

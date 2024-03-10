@@ -2,10 +2,14 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:safety_app/components/custom_slider.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 import 'package:safety_app/widgets/emergency.dart';
+import 'package:safety_app/widgets/explore.dart';
 import 'package:safety_app/widgets/life_safe.dart';
+
+import '../utils/quotes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -72,6 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: ListView(
                   shrinkWrap: true,
                   children: [
+                    SizedBox(height: screenHeight*0.03,),
+                    const ExploreWidget(),
                     SizedBox(height: screenHeight*0.03,),
                     const EmergencyWidget(),
                     SizedBox(height: screenHeight*0.03,),
