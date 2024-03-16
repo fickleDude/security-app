@@ -54,9 +54,8 @@ dependencies:
   geolocator: ^11.0.0
   #converting geographic coordinates into a human-readable address
   geocoding: ^2.2.0
-
-
-
+  #manage app user state
+  provider: ^6.1.2
 
 
 
@@ -72,6 +71,9 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
   fluttertoast: ^8.2.4
+
+  #securely store app user state
+  flutter_secure_storage: ^9.0.0
 
 
 

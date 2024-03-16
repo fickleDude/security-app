@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:safety_app/components/custom_slider.dart';
@@ -10,6 +11,9 @@ import 'package:safety_app/widgets/explore.dart';
 import 'package:safety_app/widgets/life_safe.dart';
 import 'package:safety_app/widgets/send_location.dart';
 
+import '../logic/providers/app_user_provider.dart';
+import '../logic/services/auth_service.dart';
+import '../logic/services/storage_service.dart';
 import '../utils/quotes.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late double screenWidth;
   late double screenHeight;
 
+  final _authService = AuthService.auth;
+
   @override
   Widget build(BuildContext context) {
 
@@ -36,8 +42,11 @@ class _HomeScreenState extends State<HomeScreen> {
         heroTag: null,
         backgroundColor: primaryColor,
         shape: const CircleBorder(),
-        onPressed: (){
-          context.go("/welcome/login");
+        onPressed: () async{
+          await _authService.logout().whenComplete(() async {
+            // set userinfo to null, will rebuild the consumer in main.dart
+            context.read<AppUserProvider>().logout();
+          });
         },
         child: const Icon(Icons.logout, color: Colors.black),),
       appBar: AppBar(

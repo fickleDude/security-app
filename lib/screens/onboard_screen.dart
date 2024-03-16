@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget{
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      body: const Text("SAFETY APP", style: TextStyle(fontSize: 24),),
+      body: const Center(child: Text("SAFETY APP", style: TextStyle(fontSize: 24),)),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [

@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'package:safety_app/screens/home_screen.dart';
 import 'package:safety_app/screens/login_screen.dart';
 import 'package:safety_app/screens/profile_screen.dart';
-import 'package:safety_app/screens/welcome_screen.dart';
+import 'package:safety_app/screens/splash_screen.dart';
+import 'package:safety_app/screens/onboard_screen.dart';
 import 'package:safety_app/screens/register_screen.dart';
 import 'package:safety_app/utils/constants.dart';
+
+import 'logic/providers/app_user_provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,10 +19,14 @@ void main() async{
   runApp(const MyApp());
 }
 
-GoRouter router() {
+GoRouter router(String initialLocation) {
   return GoRouter(
-    initialLocation: '/home',
+    initialLocation: initialLocation,
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
           path: '/welcome',
           builder: (context, state) => WelcomeScreen(),
@@ -65,9 +73,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+        create:(context) => AppUserProvider(),
+        builder: (context, child)=>Consumer<AppUserProvider>(builder: (context, authState, _){
+          return FutureBuilder(
+            future: authState.login(),
+            builder: (context, snapshot) =>
+            snapshot.connectionState == ConnectionState.waiting
+                ? appSetUp('/splash')
+                : authState.isAuthorized //check if user info empty or not
+                ? appSetUp('/home')
+                : authState.displayedOnboard.isNotEmpty
+                ? appSetUp('/welcome/login')
+                : appSetUp('/welcome'),
+          );
+        },),
+    );
+
+  }
+
+  Widget appSetUp(String initialLocation){
     return MaterialApp.router(
-      title: 'SAFETY APP',
-      theme: ThemeData(
+        title: 'SAFETY APP',
+        theme: ThemeData(
           textTheme: TextTheme(
             //screen label
             titleLarge: GoogleFonts.firaCode(fontSize: 40, color: primaryColor, fontWeight: FontWeight.bold),
@@ -89,7 +117,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        routerConfig: router()
-      );
+        routerConfig: router(initialLocation)
+    );
   }
 }

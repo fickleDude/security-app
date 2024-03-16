@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/storage_service.dart';
+import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/validators/validator.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
 import '../components/custom_text_field.dart';
+import '../logic/auth_ecxeption_handler.dart';
 import '../utils/constants.dart';
 import '../validators/form_validator_cubit.dart';
 
@@ -16,12 +20,18 @@ class RegisterScreen extends StatefulWidget{
 }
 
 class _RegisterScreenState extends State<RegisterScreen> with Validator{
+  //FORM
   bool _isPasswordShown = false;//make password visible or invisible
   final _formKey = GlobalKey<FormState>();//manage form state
   final FormValidatorCubit _formValidatorCubit = FormValidatorCubit();//manage form fields state
-  final _formData = <String, Object>{};//store form fields value
+  final _formData = <String, String>{};//store form fields value
 
   late double screenHeight;
+  bool isLoading = false;
+
+  //AUTH
+  final _authService = AuthService.auth;
+  final _storageService = StorageService.storage;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +40,9 @@ class _RegisterScreenState extends State<RegisterScreen> with Validator{
     return Scaffold(
       body: SafeArea(
         //custom padding based on system
-        child: Padding(
+        child: isLoading
+          ? const SplashScreen()
+          : Padding(
           padding: const EdgeInsets.all(8.0),
           child: BlocSelector<FormValidatorCubit, FormValidatorState, AutovalidateMode>(
             bloc: _formValidatorCubit,
@@ -126,11 +138,8 @@ class _RegisterScreenState extends State<RegisterScreen> with Validator{
                       SizedBox(height: screenHeight*0.03,),
                       //button
                       ElevatedButton(
-                        onPressed: () {
-                          if(_formKey.currentState!.validate()){
-                            onSubmit();
-                          }
-                          // //onSubmit();
+                        onPressed: () async{
+                          _register();
                         },
                         style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
@@ -146,36 +155,33 @@ class _RegisterScreenState extends State<RegisterScreen> with Validator{
                 );
             },
           )
-
-
         ),
       ),
     );
   }
 
-  void onSubmit(){
+  void _register() async{
+    setState(() { isLoading = true; });
     _formKey.currentState!.save();
-    if(_formData['password'] != _formData['rpassword']){
-      dialog(context, 'RETYPE PASSWORD!');
-    }else{
-      context.go("/welcome/login");
-      // try {
-      //   UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      //       email: formData['email'].toString(),
-      //       password: formData['password'].toString()
-      //   ).whenComplete(() => context.go("/welcome/login"));
-      // } on FirebaseAuthException catch (e) {
-      //   if (e.code == 'weak-password') {
-      //     dialog(context, 'The password provided is too weak.');
-      //     print('The password provided is too weak.');
-      //   } else if (e.code == 'email-already-in-use') {
-      //     dialog(context, 'The account already exists for that email.');
-      //     print('The account already exists for that email.');
-      //   }
-      // } catch (e) {
-      //   dialog(context, e.toString());
-      //   print(e);
-      // }
+    if(_formKey.currentState!.validate()){
+      if(_formData['password'] != _formData['rpassword']){
+        dialog(context, 'RETYPE PASSWORD!');
+        return;
+      }
+      final status = await _authService.register(
+          _formData['email']!,
+          _formData['password']!,
+        _formData['name']!
+      ).whenComplete((){
+        setState(() { isLoading = false; });
+      });
+      if (status == AuthStatus.successful) {
+        //never show on boarding screen again
+        await _storageService.writeSecureData(onBoardKey, "true");
+        context.go('/welcome/login');
+      } else {
+        dialog(context, AuthExceptionHandler.generateErrorMessage(status));
+      }
     }
   }
 }

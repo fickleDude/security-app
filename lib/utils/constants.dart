@@ -9,6 +9,9 @@ Color gradientColorDark = Color(0xFF414680);
 Color gradientColorBright = Color(0xFFFB8580);
 Color defaultColor = Colors.grey;
 
+const String userKey = "USER_INFO";
+const String onBoardKey = "IS_ONBOARD_SHOWN";
+
 dialog(BuildContext context, String text){
   showDialog(context: context,
       builder: (context) => AlertDialog(

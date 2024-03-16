@@ -1,11 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safety_app/components/custom_text_field.dart';
+import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/storage_service.dart';
+import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 import 'package:safety_app/validators/validator.dart';
 
+import '../logic/auth_ecxeption_handler.dart';
+import '../logic/models/user_model.dart';
+import '../logic/providers/app_user_provider.dart';
 import '../validators/form_validator_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,17 +24,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> with Validator{
-  bool isPasswordShown = false;
+  bool _isPasswordShown = false;
   //uniquely identifies elements across the app and provides access to State
-  final formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   final FormValidatorCubit _formValidatorCubit = FormValidatorCubit();
-  final formData = <String, Object>{};
+  final _formData = <String, String>{};
 
+  final _authService = AuthService.auth;
+  final _storageService = StorageService.storage;
+
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: isLoading
+        ? const SplashScreen()
+        : SafeArea(
         //custom padding based on system
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -36,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
             selector: (state) => state.autoValidateMode,
             builder: (context, AutovalidateMode autoValidateMode){
               return Form(
-                key: formKey,
+                key: _formKey,
                 autovalidateMode: autoValidateMode,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -56,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
                       onValidate: validateEmail,
                       onChange: _formValidatorCubit.updateEmail,
                       onSave: (email){
-                        formData["email"] = email ?? "";
+                        _formData["email"] = email ?? "";
                       },
                       inputAction: TextInputAction.next,
                       keyboardType: TextInputType.emailAddress,
@@ -64,30 +77,28 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
                     //password
                     CustomTextField(
                       hintText: 'enter password',
-                      isPassword: isPasswordShown,
+                      isPassword: _isPasswordShown,
                       prefix: const Icon(Icons.vpn_key_rounded),
                       suffix: IconButton(
                         onPressed: (){
                           setState(() {
-                            isPasswordShown = !isPasswordShown;
+                            _isPasswordShown = !_isPasswordShown;
                           });
                         },
-                        icon: isPasswordShown
+                        icon: _isPasswordShown
                             ? const Icon(Icons.visibility_off)
                             : const Icon(Icons.visibility),
                       ),
                       onValidate: validatePassword,
                       onChange: _formValidatorCubit.updatePassword,
                       onSave: (password){
-                        formData["password"] = password ?? "";
+                        _formData["password"] = password ?? "";
                       },
                     ),
                     //button
                     ElevatedButton(
-                      onPressed: () {
-                        if(formKey.currentState!.validate()){
-                          onSubmit();
-                        }
+                      onPressed: () async{
+                        _login();
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
@@ -127,26 +138,42 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
     );
   }
 
-  void onSubmit(){
-    formKey.currentState!.save();
-    context.go("/home");
-    // try {
-    //   UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-    //       email: formData['email'].toString(),
-    //       password: formData['password'].toString()
-    //   );
-    //   if(userCredential.user != null){
-    //     context.go("/home");
-    //   }
-    // } on FirebaseAuthException catch (e) {
-    //   if (e.code == 'user-not-found') {
-    //     dialog(context, 'No user found for that email.');
-    //     print('No user found for that email.');
-    //   } else if (e.code == 'wrong-password') {
-    //     dialog(context, 'Wrong password provided for that user.');
-    //     print('Wrong password provided for that user.');
-    //   }
-    // }
+  //LOGIC
+  void _login() async{
+    //show splash screen while login
+    setState(() { isLoading = true; });
+    _formKey.currentState!.save();
+    if(_formKey.currentState!.validate()){
+      final status = await _authService.login(
+          _formData['email']!,
+          _formData['password']!
+      ).whenComplete((){
+        setState(() { isLoading = false; });
+      });
+      if (status == AuthStatus.successful) {
+        // set userinfo if sucess login.
+        // this will rebuild the consumer in main.dart
+        // and navigate to homescreen
+        User currentUser = _authService.getCurrentUser()!;
+        AppUserModel userToStore = AppUserModel(
+            id: currentUser.uid,
+            name: currentUser.displayName,
+            email: currentUser.email
+        );
+        //set up app user
+        context.read<AppUserProvider>().user = userToStore;
+        // then save the user info
+        await _storageService.writeSecureData(userKey, AppUserModel.userToJson(userToStore));
+      } else {
+        dialog(context, AuthExceptionHandler.generateErrorMessage(status));
+      }
+    }
+  }
+
+
+  void _resetPassword() async{
+    final status = await _authService.resetPassword(_formData['email']!);
+    dialog(context, AuthExceptionHandler.generateErrorMessage(status));
   }
 
 }
