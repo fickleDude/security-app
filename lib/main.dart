@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/screens/home_screen.dart';
+import 'package:safety_app/screens/home_screens/chat_screen.dart';
+import 'package:safety_app/screens/home_screens/contacts_screen.dart';
+import 'package:safety_app/screens/home_screens/home_screen.dart';
 import 'package:safety_app/screens/login_screen.dart';
-import 'package:safety_app/screens/profile_screen.dart';
+import 'package:safety_app/screens/home_screens/profile_screen.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/screens/onboard_screen.dart';
 import 'package:safety_app/screens/register_screen.dart';
@@ -48,17 +50,14 @@ GoRouter router(String initialLocation) {
             GoRoute(
               path: 'profile',
               builder: (context, state) => const ProfileScreen(),
-              // routes: [
-              //   //path with object parameter
-              //   GoRoute(
-              //       path: 'note',
-              //       name: 'note',
-              //       builder: (context, state){
-              //         NoteModel? note = state.extra as NoteModel?; // 👈 casting is important
-              //         return NoteForm(note: note);
-              //       }
-              //   ),
-              // ],
+            ),
+            GoRoute(
+              path: 'contacts',
+              builder: (context, state) => const ContactsScreen(),
+            ),
+            GoRoute(
+              path: 'chat',
+              builder: (context, state) => const ChatScreen(),
             ),
           ]
       ),

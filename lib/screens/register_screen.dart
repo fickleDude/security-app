@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:safety_app/logic/models/user_model.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
 import 'package:safety_app/logic/services/storage_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
@@ -178,6 +180,15 @@ class _RegisterScreenState extends State<RegisterScreen> with Validator{
       if (status == AuthStatus.successful) {
         //never show on boarding screen again
         await _storageService.writeSecureData(onBoardKey, "true");
+        var db = FirebaseFirestore.instance
+            .collection('users')
+            .doc(_authService.getCurrentUser()!.uid);
+        AppUserModel user = AppUserModel(
+            id: _authService.getCurrentUser()!.uid,
+            name: _formData['name'],
+            email: _formData['email']
+        );
+        await db.set(user.toMap());
         context.go('/welcome/login');
       } else {
         dialog(context, AuthExceptionHandler.generateErrorMessage(status));

@@ -1,12 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/storage_service.dart';
 import 'package:safety_app/validators/validator.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
-import '../components/custom_text_field.dart';
-import '../utils/constants.dart';
-import '../validators/form_validator_cubit.dart';
+import '../../components/custom_text_field.dart';
+import '../../logic/auth_ecxeption_handler.dart';
+import '../../logic/models/user_model.dart';
+import '../../logic/providers/app_user_provider.dart';
+import '../../utils/constants.dart';
+import '../../validators/form_validator_cubit.dart';
+import '../splash_screen.dart';
 
 class ProfileScreen extends StatefulWidget{
   const ProfileScreen({super.key});
@@ -23,19 +31,25 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
 
   late double screenHeight;
 
+  final AuthService _authService = AuthService.auth;
+  final StorageService _storageService = StorageService.storage;
+
+  bool isLoading = false;
+
   @override
   void initState() {
+    var user = Provider.of<AppUserProvider>(context,listen: false).user;
     _formValidatorCubit = FormValidatorCubit()..initForm(
-        name: 'Joseph Kamal',
-        email: 'josephkamal@gmail.com',
-        password: 'password',
+        name: user.name ?? "",
+        email: user.email ?? "",
+        password: "",
         autoValidateMode: AutovalidateMode.disabled
     );
     _formData = <String, Object>{
-      'name': 'Joseph Kamal',
-      'email': 'josephkamal@gmail.com',
-      'password': 'password',
-      'rpassword': 'password'
+      'name': user.name ?? "",
+      'email': user.email ?? "",
+      'password': "",
+      'rpassword': ""
     };
   }
 
@@ -44,7 +58,9 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
     screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: SafeArea(
+      body: isLoading
+      ? const SplashScreen()
+      : SafeArea(
         //custom padding based on system
         child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -148,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
                           ElevatedButton(
                             onPressed: () {
                               if(_formKey.currentState!.validate()){
-                                onSubmit();
+                                _update();
                               }
                               // //onSubmit();
                             },
@@ -173,29 +189,38 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
     );
   }
 
-  void onSubmit(){
+  void _update() async{
+    setState(() { isLoading = true; });
     _formKey.currentState!.save();
     if(_formData['password'] != _formData['rpassword']){
       dialog(context, 'RETYPE PASSWORD!');
-    }else{
-      context.go("/home");
-      // try {
-      //   UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      //       email: formData['email'].toString(),
-      //       password: formData['password'].toString()
-      //   ).whenComplete(() => context.go("/welcome/login"));
-      // } on FirebaseAuthException catch (e) {
-      //   if (e.code == 'weak-password') {
-      //     dialog(context, 'The password provided is too weak.');
-      //     print('The password provided is too weak.');
-      //   } else if (e.code == 'email-already-in-use') {
-      //     dialog(context, 'The account already exists for that email.');
-      //     print('The account already exists for that email.');
-      //   }
-      // } catch (e) {
-      //   dialog(context, e.toString());
-      //   print(e);
-      // }
+      setState(() { isLoading = false; });
+    }else if(_formKey.currentState!.validate()){
+      //update user in firebase auth
+      final status = await _authService.updateProfile(
+            _formData['name'].toString(),
+            _formData['email'].toString(),
+            _formData['password'].toString()
+        ).whenComplete(() => setState(() { isLoading = false; }));
+      if (status == AuthStatus.successful) {
+        //update info in local storage
+        AppUserModel userToUpdate = AppUserModel(
+            id: _authService.getCurrentUser()?.uid,
+            name: _formData['name'].toString(),
+            email: _formData['email'].toString()
+        );
+        //set up app user
+        context.read<AppUserProvider>().user = userToUpdate;
+        _storageService.updateSecureData(
+            userKey,
+            AppUserModel.userToJson(userToUpdate));
+        var db = FirebaseFirestore.instance
+            .collection('users')
+            .doc(_authService.getCurrentUser()!.uid);
+        await db.set(userToUpdate.toMap());
+      } else {
+        dialog(context, AuthExceptionHandler.generateErrorMessage(status));
+      }
     }
   }
 }

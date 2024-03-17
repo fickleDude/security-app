@@ -51,6 +51,19 @@ class AuthService {
     }
   }
 
+  Future<AuthStatus> updateProfile(String name, String email, String password) async {
+    try{
+      await _authInstance!.currentUser?.updateDisplayName(name);
+      await _authInstance!.currentUser?.updatePassword(password);
+      await _authInstance!.currentUser?.updateEmail(email);
+      return AuthStatus.successful;
+    }on FirebaseAuthException catch (e) {
+      return AuthExceptionHandler.handleAuthException(e);
+    } catch (e) {
+      return AuthStatus.unknown;
+    }
+  }
+
   bool isAuthorized(){
     bool isAuth = false;
     _authInstance!

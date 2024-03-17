@@ -16,6 +16,12 @@ class StorageService {
     return readData;
   }
 
+  Future<void> updateSecureData(String key, String value) async {
+    await deleteSecureData(key).whenComplete(() async{
+      await writeSecureData(key, value);
+    });
+  }
+
   Future<List<String>> readAllSecureData() async {
     var allData = await _secureStorage.readAll(aOptions: _getAndroidOptions());
     List<String> list = allData.entries.map((e) => "${e.key}:${e.value}").toList();
