@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
-import 'package:safety_app/logic/services/storage_service.dart';
+import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/validators/validator.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
@@ -32,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
   late double screenHeight;
 
   final AuthService _authService = AuthService.auth;
-  final StorageService _storageService = StorageService.storage;
+  final LocalStorageService _storageService = LocalStorageService.storage;
 
   bool isLoading = false;
 

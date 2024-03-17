@@ -1,9 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StorageService {
+class LocalStorageService {
 
-  StorageService._();
-  static final StorageService storage = StorageService._();
+  LocalStorageService._();
+  static final LocalStorageService storage = LocalStorageService._();
   static const _secureStorage = FlutterSecureStorage();
 
   Future<void> writeSecureData(String key, String data) async {

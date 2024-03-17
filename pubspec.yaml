@@ -57,6 +57,12 @@ dependencies:
   geocoding: ^2.2.0
   #manage app user state
   provider: ^6.1.2
+  #manage device permission
+  permission_handler: ^11.0.1
+  #access and manage the device's contacts
+  contacts_service: ^0.6.3
+  #DB
+  sqflite: ^2.3.2
 
 
 

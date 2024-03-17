@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safety_app/components/custom_text_field.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
-import 'package:safety_app/logic/services/storage_service.dart';
+import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
   final _formData = <String, String>{};
 
   final _authService = AuthService.auth;
-  final _storageService = StorageService.storage;
+  final _storageService = LocalStorageService.storage;
 
   bool isLoading = false;
 

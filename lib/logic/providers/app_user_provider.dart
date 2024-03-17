@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../utils/constants.dart';
 import '../models/user_model.dart';
-import '../services/storage_service.dart';
+import '../services/local_storage_service.dart';
 
 class AppUserProvider extends ChangeNotifier {
   /// state  of UserModel information
@@ -15,7 +15,7 @@ class AppUserProvider extends ChangeNotifier {
   }
 
   /// state of UserModel information in storage
-  final StorageService _storageService = StorageService.storage;
+  final LocalStorageService _storageService = LocalStorageService.storage;
 
   String displayedOnboard = "";
 

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:safety_app/screens/home_screens/add_contacts_screen.dart';
 import 'package:safety_app/screens/home_screens/chat_screen.dart';
 import 'package:safety_app/screens/home_screens/contacts_screen.dart';
 import 'package:safety_app/screens/home_screens/home_screen.dart';
@@ -53,7 +54,13 @@ GoRouter router(String initialLocation) {
             ),
             GoRoute(
               path: 'contacts',
-              builder: (context, state) => const ContactsScreen(),
+              builder: (context, state) => const AddContactsScreen(),
+              routes: [
+                GoRoute(
+                    path: 'user_contacts',
+                    builder: (context, state) => const ContactsScreen()
+                )
+              ]
             ),
             GoRoute(
               path: 'chat',
@@ -72,7 +79,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return
+      ChangeNotifierProvider(
         create:(context) => AppUserProvider(),
         builder: (context, child)=>Consumer<AppUserProvider>(builder: (context, authState, _){
           return FutureBuilder(
