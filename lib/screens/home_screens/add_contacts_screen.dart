@@ -5,10 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/components/custom_button.dart';
 import 'package:safety_app/logic/models/contact_model.dart';
+import 'package:safety_app/logic/providers/contact_list_provider.dart';
 import 'package:safety_app/logic/services/db_service.dart';
-import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/utils/constants.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class AddContactsScreen extends StatefulWidget {
@@ -19,20 +18,10 @@ class AddContactsScreen extends StatefulWidget {
 }
 
 class _AddContactsScreenState extends State<AddContactsScreen> {
-  DatabaseService databaseService = DatabaseService();
-  // List<UserContact>? contactList;
-  // int count = 0;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-  //     _showList();
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ContactsListProvider>(context, listen: false).fetchContacts();
     return SafeArea(
         child: Container(
           color: backgroundColor,
@@ -44,20 +33,14 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
                     title: "ADD CONTACTS",
                     onPressed: () async {
                       context.go("/home/contacts/user_contacts");
-                      // _showList();
                     }),
-                    ChangeNotifierProvider(
-                    create:(context) => DatabaseService(),
-                    builder: (context, child)=>Consumer<DatabaseService>(builder: (context, dbService, _){
-                      return FutureBuilder(
-                          future: dbService.getContactList(),
-                          builder: (context, contactList) {
-                              return Expanded(
+                    Consumer<ContactsListProvider>(
+                      builder: (context, contactsProvider, _){
+                        return Expanded(
                                 child: ListView.builder(
-                                  itemCount: contactList.data?.length,
+                                  itemCount: contactsProvider.contactsList.length,
                                   itemBuilder: (BuildContext context, int index) {
-                                    UserContact contact = contactList
-                                        .data![index];
+                                    UserContact contact = contactsProvider.contactsList[index];
                                     return Card(
                                       color: primaryColor,
                                       child: Padding(
@@ -90,44 +73,23 @@ class _AddContactsScreenState extends State<AddContactsScreen> {
                                           ),
                                         ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              );
+                                );
                             }
-                          );
-
+                          )
+                        );
                     },
                   )
-                  ,
-                ),
-              ],
+            ]
             ),
           ),
         )
     );
   }
 
-  //manipulate with data in sqlite
-  // void _showList(){
-  //   Future<Database> dbFuture = databaseService.initializeDatabase();
-  //   dbFuture.then((database) {
-  //     Future<List<UserContact>> contactListFuture =
-  //     databaseService.getContactList();
-  //     contactListFuture.then((value) {
-  //       setState(() {
-  //         contactList = value;
-  //         count = value.length;
-  //       });
-  //     });
-  //   });
-  // }
-
   void _deleteContact(UserContact contact) async {
-    int result = await databaseService.deleteContact(contact.id);
-    if (result != 0) {
+    var result = await Provider.of<ContactsListProvider>(context, listen: false).remove(contact);
+    if (result) {
       Fluttertoast.showToast(msg: "contact removed successfully");
-      // _showList();
     }
   }
 

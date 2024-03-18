@@ -5,7 +5,7 @@ import 'package:safety_app/utils/ui_theme_extension.dart';
 import 'package:safety_app/widgets/emergency.dart';
 import 'package:safety_app/widgets/explore.dart';
 import 'package:safety_app/widgets/life_safe.dart';
-import 'package:safety_app/widgets/send_location.dart';
+import 'package:safety_app/screens/home_screens/send_location.dart';
 import 'package:safety_app/widgets/side_navigation.dart';
 
 import '../../logic/providers/app_user_provider.dart';

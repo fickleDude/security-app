@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:safety_app/logic/providers/contact_list_provider.dart';
 import 'package:safety_app/screens/home_screens/add_contacts_screen.dart';
 import 'package:safety_app/screens/home_screens/chat_screen.dart';
 import 'package:safety_app/screens/home_screens/contacts_screen.dart';
@@ -79,10 +80,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return
-      ChangeNotifierProvider(
-        create:(context) => AppUserProvider(),
-        builder: (context, child)=>Consumer<AppUserProvider>(builder: (context, authState, _){
+    return MultiProvider(
+        providers: [
+        ChangeNotifierProvider(create:(context) => AppUserProvider(),),
+        ChangeNotifierProvider(create:(context) => ContactsListProvider(),),
+        ],
+        builder: (context, child)=>Consumer<AppUserProvider>(builder: (context, authState, _) {
           return FutureBuilder(
             future: authState.login(),
             builder: (context, snapshot) =>
@@ -94,9 +97,9 @@ class MyApp extends StatelessWidget {
                 ? appSetUp('/welcome/login')
                 : appSetUp('/welcome'),
           );
-        },),
+        }
+      )
     );
-
   }
 
   Widget appSetUp(String initialLocation){

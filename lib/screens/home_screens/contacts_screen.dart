@@ -2,12 +2,14 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:safety_app/logic/services/db_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../logic/models/contact_model.dart';
+import '../../logic/providers/contact_list_provider.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -24,7 +26,6 @@ class _ContactsScreenState extends State<ContactsScreen>{
   List<Contact> _filteredContacts = [];
   //to filter contacts
   TextEditingController searchController = TextEditingController();
-  final DatabaseService _databaseService = DatabaseService();
 
   @override
   void initState() {
@@ -171,8 +172,8 @@ class _ContactsScreenState extends State<ContactsScreen>{
 
   //INTEGRATION WITH DB
   void _addContact(UserContact newContact) async {
-    int result = await _databaseService.insertContact(newContact);
-    if (result != 0) {
+    var result = await Provider.of<ContactsListProvider>(context, listen: false).add(newContact);
+    if (result) {
       Fluttertoast.showToast(msg: "contact added successfully");
     } else {
       Fluttertoast.showToast(msg: "Failed to add contacts");

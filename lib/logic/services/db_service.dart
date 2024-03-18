@@ -1,9 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/contact_model.dart';
 
-class DatabaseService extends ChangeNotifier{
+class DatabaseService{
   //database structure
   String contactTable = 'contact_table';
   String colId = 'id';
@@ -61,8 +60,6 @@ class DatabaseService extends ChangeNotifier{
     Database db = await database;
     //insert returns id of last inserted row
     var result = await db.insert(contactTable, contact.toMap());
-    // print(await db.query(contactTable));
-    notifyListeners();
     return result;
   }
 
@@ -71,7 +68,6 @@ class DatabaseService extends ChangeNotifier{
     Database db = await database;
     var result = await db.update(contactTable, contact.toMap(),
         where: '$colId = ?', whereArgs: [contact.id]);
-    notifyListeners();
     return result;
   }
 
@@ -81,8 +77,6 @@ class DatabaseService extends ChangeNotifier{
     //rawDelete returns number of changes made
     int result =
     await db.rawDelete('DELETE FROM $contactTable WHERE $colId = $id');
-    // print(await db.query(contactTable));
-    notifyListeners();
     return result;
   }
 
@@ -107,7 +101,6 @@ class DatabaseService extends ChangeNotifier{
     for (int i = 0; i < count; i++) {
       contactList.add(UserContact.fromMapObject(contactMapList[i]));
     }
-    notifyListeners();
     return contactList;
   }
 }
