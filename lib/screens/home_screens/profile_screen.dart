@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/validators/validator.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
@@ -32,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
   late double screenHeight;
 
   final AuthService _authService = AuthService.auth;
+  final CloudService _cloudService = CloudService.cloud;
   final LocalStorageService _storageService = LocalStorageService.storage;
 
   bool isLoading = false;
@@ -190,37 +192,44 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
   }
 
   void _update() async{
+    //SET LOADING STATE
     setState(() { isLoading = true; });
+    //UPDATE FORM DATA MAP
     _formKey.currentState!.save();
-    if(_formData['password'] != _formData['rpassword']){
-      dialog(context, 'RETYPE PASSWORD!');
-      setState(() { isLoading = false; });
-    }else if(_formKey.currentState!.validate()){
-      //update user in firebase auth
-      final status = await _authService.updateProfile(
-            _formData['name'].toString(),
-            _formData['email'].toString(),
-            _formData['password'].toString()
-        ).whenComplete(() => setState(() { isLoading = false; }));
-      if (status == AuthStatus.successful) {
-        //update info in local storage
-        AppUserModel userToUpdate = AppUserModel(
-            id: _authService.getCurrentUser()?.uid,
-            name: _formData['name'].toString(),
-            email: _formData['email'].toString()
-        );
-        //set up app user
-        context.read<AppUserProvider>().user = userToUpdate;
-        _storageService.updateSecureData(
-            userKey,
-            AppUserModel.userToJson(userToUpdate));
-        var db = FirebaseFirestore.instance
-            .collection('users')
-            .doc(_authService.getCurrentUser()!.uid);
-        await db.set(userToUpdate.toMap());
-      } else {
-        dialog(context, AuthExceptionHandler.generateErrorMessage(status));
+    //VALIDATE FORM FIELDS
+    if(_formKey.currentState!.validate()) {
+      if(_formData['password'] != _formData['rpassword']){
+        dialog(context, 'RETYPE PASSWORD!');
+        return;
       }
+      //UPDATE USER IN FIREBASE AUTH
+      final status = await _authService.updateProfile(
+          _formData['name'].toString(),
+          _formData['email'].toString(),
+          _formData['password'].toString()
+        )
+        .whenComplete(() => setState(() { isLoading = false; }));
+        if (status == AuthStatus.successful) {
+          //GET NEW USER INFO
+          AppUserModel userToUpdate = AppUserModel(
+              id: _authService.getCurrentUser()?.uid,
+              name: _formData['name'].toString(),
+              email: _formData['email'].toString()
+          );
+          //STORE NEW DATA IN LOCAL STORAGE
+          await _storageService.updateSecureData(
+              userKey,
+              AppUserModel.userToJson(userToUpdate)
+          )
+          .whenComplete(() => context.read<AppUserProvider>().user = userToUpdate)
+          .onError((error, stackTrace) => dialog(context, "Can't update info to local storage"));
+          //UPDATE IN CLOUD STORAGE
+          await _cloudService.updateUser(userToUpdate.toMap())
+              .onError((error, stackTrace) => dialog(context, "Can't update info to cloud storage"));
+        }
+        else if(context.mounted){
+          dialog(context, AuthExceptionHandler.generateErrorMessage(status));
+        }
     }
   }
 }

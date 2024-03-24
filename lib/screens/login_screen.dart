@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safety_app/components/custom_text_field.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/utils/constants.dart';
@@ -31,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
   final _formData = <String, String>{};
 
   final _authService = AuthService.auth;
+  final _cloudService = CloudService.cloud;
   final _storageService = LocalStorageService.storage;
 
   bool isLoading = false;
@@ -140,8 +142,9 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
 
   //LOGIC
   void _login() async{
-    //show splash screen while login
+    //SET LOADING STATE
     setState(() { isLoading = true; });
+    //UPDATE FORM DATA MAP
     _formKey.currentState!.save();
     if(_formKey.currentState!.validate()){
       final status = await _authService.login(
@@ -151,20 +154,28 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
         setState(() { isLoading = false; });
       });
       if (status == AuthStatus.successful) {
-        // set userinfo if sucess login.
-        // this will rebuild the consumer in main.dart
-        // and navigate to homescreen
+        //GET LOG IN USER INFO
         User currentUser = _authService.getCurrentUser()!;
         AppUserModel userToStore = AppUserModel(
             id: currentUser.uid,
             name: currentUser.displayName,
             email: currentUser.email
         );
-        //set up app user
-        context.read<AppUserProvider>().user = userToStore;
-        // then save the user info
-        await _storageService.writeSecureData(userKey, AppUserModel.userToJson(userToStore));
-      } else {
+        //STORE IT TO LOCAL STORAGE
+        String? flag = await _storageService.readSecureData(onBoardKey);
+        if(flag == null) {
+          await _storageService
+              .writeSecureData(onBoardKey, "true");
+        }
+        await _storageService
+            .writeSecureData(userKey, AppUserModel.userToJson(userToStore))
+            .whenComplete(() => context.read<AppUserProvider>().user = userToStore)
+            .onError((error, stackTrace) => dialog(context, "Can't save info to local storage"));
+        //STORE TO CLOUD STORAGE
+        await _cloudService
+            .addUser(userToStore.toMap())
+            .onError((error, stackTrace) => dialog(context, "Can't save info to cloud storage"));
+      } else if(context.mounted){
         dialog(context, AuthExceptionHandler.generateErrorMessage(status));
       }
     }

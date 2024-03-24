@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:safety_app/logic/models/user_model.dart';
 import 'package:safety_app/logic/providers/contact_list_provider.dart';
 import 'package:safety_app/screens/home_screens/add_contacts_screen.dart';
-import 'package:safety_app/screens/home_screens/chat_screen.dart';
+import 'package:safety_app/screens/home_screens/chat/chat_screen.dart';
+import 'package:safety_app/screens/home_screens/messenger_screen.dart';
 import 'package:safety_app/screens/home_screens/contacts_screen.dart';
 import 'package:safety_app/screens/home_screens/home_screen.dart';
 import 'package:safety_app/screens/login_screen.dart';
@@ -64,9 +66,20 @@ GoRouter router(String initialLocation) {
               ]
             ),
             GoRoute(
-              path: 'chat',
-              builder: (context, state) => const ChatScreen(),
+              path: 'messenger',
+              builder: (context, state) => const MessengerScreen(),
+              routes: [
+                GoRoute(
+                  path: 'chat',
+                  name: 'chat',
+                  builder: (context, state){
+                    AppUserModel? recipient = state.extra as AppUserModel?; //casting is important
+                    return ChatScreen(recipient: recipient!,);
+                  },
+                ),
+              ]
             ),
+
           ]
       ),
 
@@ -92,7 +105,7 @@ class MyApp extends StatelessWidget {
             snapshot.connectionState == ConnectionState.waiting
                 ? appSetUp('/splash')
                 : authState.isAuthorized //check if user info empty or not
-                ? appSetUp('/home')
+                ? appSetUp('/home/messenger')
                 : authState.displayedOnboard.isNotEmpty
                 ? appSetUp('/welcome/login')
                 : appSetUp('/welcome'),
@@ -114,6 +127,9 @@ class MyApp extends StatelessWidget {
             //under button labels
             labelMedium: GoogleFonts.firaCode(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold),
             labelSmall: GoogleFonts.firaCode(fontSize: 11, color: primaryColor),
+            //for messages in chat
+            bodySmall:GoogleFonts.firaCode(fontSize: 11, color: defaultColor),
+            bodyMedium: GoogleFonts.firaCode(fontSize: 18, color: backgroundColor,fontWeight: FontWeight.bold),
           ),
           primaryTextTheme: TextTheme(
             //label in text field

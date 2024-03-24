@@ -22,6 +22,7 @@ class AppUserProvider extends ChangeNotifier {
   void logout(){
     _user = const AppUserModel(); // api token is empty
     _storageService.deleteSecureData(userKey);
+    // _storageService.deleteAllSecureData();
     notifyListeners();
   }
 

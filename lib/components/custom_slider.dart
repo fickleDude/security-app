@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:safety_app/components/safe_webview.dart';
+import 'package:safety_app/utils/ui_theme_extension.dart';
 
 class CustomSlider extends StatelessWidget {
   final List<String> articleImage;
@@ -74,7 +75,7 @@ class _CustomerSliderItem extends StatelessWidget{
             ),
           ),
         ),
-        Text(title)
+        Text(title, style: context.l2,)
       ],
 
     );

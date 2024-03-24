@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safety_app/logic/models/user_model.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
+import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/validators/validator.dart';
@@ -163,34 +164,33 @@ class _RegisterScreenState extends State<RegisterScreen> with Validator{
   }
 
   void _register() async{
+    //SET LOADING STATE
     setState(() { isLoading = true; });
+    //UPDATE FORM DATA MAP
     _formKey.currentState!.save();
+    //VALIDATE FIELDS
     if(_formKey.currentState!.validate()){
       if(_formData['password'] != _formData['rpassword']){
         dialog(context, 'RETYPE PASSWORD!');
         return;
       }
-      final status = await _authService.register(
-          _formData['email']!,
-          _formData['password']!,
-        _formData['name']!
-      ).whenComplete((){
-        setState(() { isLoading = false; });
+      //REGISTER NEW USER IN FIREBASE AUTH
+      final status = await _authService
+          .register(_formData['email']!,_formData['password']!, _formData['name']!)
+          .whenComplete(() async{
+              setState(() { isLoading = false; });
       });
       if (status == AuthStatus.successful) {
-        //never show on boarding screen again
-        await _storageService.writeSecureData(onBoardKey, "true");
-        var db = FirebaseFirestore.instance
-            .collection('users')
-            .doc(_authService.getCurrentUser()!.uid);
-        AppUserModel user = AppUserModel(
-            id: _authService.getCurrentUser()!.uid,
-            name: _formData['name'],
-            email: _formData['email']
+        //SAVE FLAG IN LOCAL STORAGE
+        await _storageService
+            .writeSecureData(onBoardKey, "true")
+            .whenComplete(() => context.go('/welcome/login'))
+            .onError((error, stackTrace) {
+              dialog(context, "Can't save info to local storage");
+            }
         );
-        await db.set(user.toMap());
-        context.go('/welcome/login');
-      } else {
+      }
+      else if(context.mounted){
         dialog(context, AuthExceptionHandler.generateErrorMessage(status));
       }
     }

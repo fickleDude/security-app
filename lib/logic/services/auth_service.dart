@@ -29,8 +29,7 @@ class AuthService {
           email: email,
           password: password
       );
-      //add store to SharedPreferences
-      _authInstance!.currentUser!.updateDisplayName(name);
+      userCredential.user?.updateDisplayName(name);
       return AuthStatus.successful;
     } on FirebaseAuthException catch (e) {
       return AuthExceptionHandler.handleAuthException(e);

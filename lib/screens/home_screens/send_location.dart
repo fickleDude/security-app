@@ -1,14 +1,12 @@
 import 'package:background_sms/background_sms.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/components/custom_button.dart';
 import 'package:safety_app/logic/models/contact_model.dart';
 import 'package:safety_app/logic/providers/contact_list_provider.dart';
-import 'package:safety_app/logic/services/db_service.dart';
+import 'package:safety_app/logic/services/location_service.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
 import '../../utils/constants.dart';
@@ -21,16 +19,27 @@ class SendLocation extends StatefulWidget {
 }
 
 class _SendLocationState extends State<SendLocation> {
-  Position? _currentPosition;
+  // Position? _currentPosition;
   String? _currentAddress;
-  LocationPermission? permission;
+  // LocationPermission? permission;
+  final _locationService = LocationService.instance;
 
   @override
   void initState(){
     super.initState();
     //permission to sent sms
     _getPermissions();
-    _getCurrentLocation();
+    _getCurrentAddress();
+  }
+
+  _getCurrentAddress() async {
+    var position = await _locationService.getPosition();
+    if(position != null){
+      setState(() async {
+        _currentAddress = await _locationService.getAddress();
+      });
+
+    }
   }
 
   @override
@@ -67,67 +76,67 @@ class _SendLocationState extends State<SendLocation> {
   }
 
   //DEFINE PLACE
-  _getCurrentLocation() async {
-    //check for permission
-    final hasPermission = await _handleLocationPermission();
-    if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      setState(() {
-        _currentPosition = position;
-        _getAddressFromLatLon();
-      });
-    }).catchError((e) {
-      Fluttertoast.showToast(msg: e.toString());
-    });
-  }
+  // _getCurrentLocation() async {
+  //   //check for permission
+  //   final hasPermission = await _handleLocationPermission();
+  //   if (!hasPermission) return;
+  //   await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+  //       .then((Position position) {
+  //     setState(() {
+  //       _currentPosition = position;
+  //       _getAddressFromLatLon();
+  //     });
+  //   }).catchError((e) {
+  //     Fluttertoast.showToast(msg: e.toString());
+  //   });
+  // }
+  //
+  // //FIND LOCATION
+  // _getAddressFromLatLon() async {
+  //   try {
+  //     List<Placemark> placeMarks = await placemarkFromCoordinates(
+  //         _currentPosition!.latitude, _currentPosition!.longitude);
+  //
+  //     Placemark place = placeMarks[0];
+  //     setState(() {
+  //       _currentAddress =
+  //           "${place.locality},${place.postalCode},${place.street},";
+  //     });
+  //   } catch (e) {
+  //     Fluttertoast.showToast(msg: e.toString());
+  //   }
+  // }
 
-  //FIND LOCATION
-  _getAddressFromLatLon() async {
-    try {
-      List<Placemark> placeMarks = await placemarkFromCoordinates(
-          _currentPosition!.latitude, _currentPosition!.longitude);
-
-      Placemark place = placeMarks[0];
-      setState(() {
-        _currentAddress =
-            "${place.locality},${place.postalCode},${place.street},";
-      });
-    } catch (e) {
-      Fluttertoast.showToast(msg: e.toString());
-    }
-  }
-
-  //MANAGE LOCATION PERMISSIONS
-  Future<bool> _handleLocationPermission() async {
-    LocationPermission permission;
-    //is location service enabled
-    bool serviceEnabled;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      Fluttertoast.showToast(
-          msg: 'Location services are disabled. '
-              'Please enable the services');
-      return false;
-    }
-    //does user granted permission to acquire the device’s location
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      //request permission if not
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        Fluttertoast.showToast(msg: 'Location permissions are denied');
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      Fluttertoast.showToast(
-          msg: 'Location permissions are permanently denied,'
-              ' we cannot request permissions.');
-      return false;
-    }
-    return true;
-  }
+  // //MANAGE LOCATION PERMISSIONS
+  // Future<bool> _handleLocationPermission() async {
+  //   // LocationPermission permission;
+  //   //is location service enabled
+  //   bool serviceEnabled;
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     Fluttertoast.showToast(
+  //         msg: 'Location services are disabled. '
+  //             'Please enable the services');
+  //     return false;
+  //   }
+  //   //does user granted permission to acquire the device’s location
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     //request permission if not
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       Fluttertoast.showToast(msg: 'Location permissions are denied');
+  //       return false;
+  //     }
+  //   }
+  //   if (permission == LocationPermission.deniedForever) {
+  //     Fluttertoast.showToast(
+  //         msg: 'Location permissions are permanently denied,'
+  //             ' we cannot request permissions.');
+  //     return false;
+  //   }
+  //   return true;
+  // }
 
   Future _showBottomSheet(BuildContext context) {
     return showModalBottomSheet(
@@ -152,15 +161,14 @@ class _SendLocationState extends State<SendLocation> {
                     if(_currentAddress != null) Center(child: Text(_currentAddress!, style: context.prT2)),
                     CustomButton(
                         title: "GET LOCATION",
-                        onPressed: (){
-                      _getCurrentLocation();
+                        onPressed: () async{
+                      await _getCurrentAddress();
                     }
                     ),
                     const SizedBox(height: 10,),
                     CustomButton(
                         title: "SHARE LOCATION",
                         onPressed: () async{
-                          ;
                           List<UserContact> contactList = Provider
                                             .of<ContactsListProvider>(context, listen:false)
                                             .contactsList;
@@ -168,19 +176,19 @@ class _SendLocationState extends State<SendLocation> {
                             Fluttertoast.showToast(
                                 msg: "emergency contact is empty");
                           }else{
-                            String messageBody =
-                                "https://www.google.com/maps/search/?api=1&query="
-                                "${_currentPosition!.latitude}%2C"
-                                "${_currentPosition!.longitude}. "
-                                "$_currentAddress";
-
-                            if (await _isPermissionGranted()) {
-                              for (var element in contactList) {
-                                _sendSms(element.number,
-                                    "i am in trouble $messageBody");
+                            String? messageBody = await _locationService.getOnMap();
+                            if(messageBody == null){
+                              Fluttertoast.showToast(
+                                  msg: "enable define location");
+                            }else{
+                              if (await _isPermissionGranted()) {
+                                for (var element in contactList) {
+                                  _sendSms(element.number,
+                                      "i am in trouble $messageBody");
+                                }
+                              } else {
+                                Fluttertoast.showToast(msg: "something wrong");
                               }
-                            } else {
-                              Fluttertoast.showToast(msg: "something wrong");
                             }
                           }
                         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:safety_app/logic/models/user_model.dart';
 
 import '../utils/constants.dart';
 
@@ -33,7 +34,7 @@ class SideNavigation extends StatelessWidget{
           ListTile(
             leading: const Icon(Icons.chat),
             title: const Text('CHATS'),
-            onTap: () => context.go('/home/chat'),
+            onTap: () => context.go('/home/messenger'),
           ),
         ],
       ),
