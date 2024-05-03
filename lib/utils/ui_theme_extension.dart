@@ -17,5 +17,6 @@ extension UIThemeExtension on BuildContext {
   TextStyle? get prL1 => Theme.of(this).primaryTextTheme.labelMedium;
   TextStyle? get prT2 => Theme.of(this).primaryTextTheme.titleMedium;
   TextStyle? get prT1 => Theme.of(this).primaryTextTheme.titleLarge;
+  TextStyle? get prL2 => Theme.of(this).primaryTextTheme.labelSmall;
   //ACCENT
 }

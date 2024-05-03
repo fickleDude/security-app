@@ -25,7 +25,7 @@ class _MessengerScreenState extends State<MessengerScreen>{
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          title: Text("CHAT", style: context.prT1,),
+          title: Text("CHATS", style: context.prT1,),
         ),
         body: StreamBuilder(
           stream: _cloudService.getRecipients(_authService.getCurrentUser()?.email),
@@ -33,30 +33,29 @@ class _MessengerScreenState extends State<MessengerScreen>{
             if(!snapshot.hasData){
               return const SplashScreen();
             }
-            return ListView.builder(
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: (BuildContext context, int index) {
-                final data = snapshot.data!.docs[index];
-                return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: ListTile(
-                        title: Padding(
-                          padding:const EdgeInsets.all(8.0),
-                          child: Text(data["name"], style: context.l1,),
+            return Padding(
+              padding: EdgeInsets.all(16.0),
+              child: ListView.separated(
+                separatorBuilder: (BuildContext context, int index) => Divider(),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final data = snapshot.data!.docs[index];
+                  return Container(
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        onTap: ()=>context.goNamed(
-                            'chat',
-                            extra: AppUserModel(id: data["id"], name: data["name"], email: data["email"])
+                        child: ListTile(
+                          trailing: Icon(Icons.message, size: 30,color: backgroundColor,),
+                          title: Text(data["name"].toString().toUpperCase(), style: context.prT2,),
+                          onTap: ()=>context.goNamed(
+                              'chat',
+                              extra: AppUserModel(id: data["id"], name: data["name"], email: data["email"])
+                          ),
                         ),
-                      ),
-                    ),
-                );
-              },
+                      );
+                },
+              ),
             );
           },
         ),

@@ -48,7 +48,8 @@ class LocationService{
     //check for permission
     bool ifAllowed = await permission;
     if (!ifAllowed) return null;
-    Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position? position = await Geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     return position;
   }
 

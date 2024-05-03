@@ -45,6 +45,7 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   cloud_firestore: ^4.14.0
+  firebase_storage: ^11.6.0
   #declarative routing
   go_router: ^13.2.0
   #form validation
@@ -65,6 +66,11 @@ dependencies:
   sqflite: ^2.3.2
   #sent location to contact
   background_sms: ^0.0.4
+  #to get image from gallery and sent it in chat
+  image_picker: ^1.0.7
+  cached_network_image: ^3.3.1
+  #unique element identifier
+  uuid: ^4.2.2
 
 
 

@@ -1,10 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:safety_app/logic/models/user_model.dart';
 import 'package:safety_app/logic/services/auth_service.dart';
-import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/logic/services/local_storage_service.dart';
 import 'package:safety_app/screens/splash_screen.dart';
 import 'package:safety_app/validators/validator.dart';

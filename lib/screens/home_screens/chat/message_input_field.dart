@@ -1,8 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:safety_app/logic/models/chat_message_model.dart';
 import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:safety_app/utils/ui_theme_extension.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../logic/services/location_service.dart';
 
@@ -25,6 +33,41 @@ class _MessageInputFieldState extends State<MessageInputField>{
   final _locationService = LocationService.instance;
   final _cloudService= CloudService.cloud;
 
+  File? imageFile;
+
+  Future getImage() async {
+    ImagePicker picker = ImagePicker();
+    await picker.pickImage(source: ImageSource.gallery).then((XFile? xFile) {
+      if (xFile != null) {
+        imageFile = File(xFile.path);
+        uploadImage();
+      }
+    });
+  }
+
+  Future getImageFromCamera() async {
+    ImagePicker picker = ImagePicker();
+    await picker.pickImage(source: ImageSource.camera).then((XFile? xFile) {
+      if (xFile != null) {
+        imageFile = File(xFile.path);
+        uploadImage();
+      }
+    });
+  }
+
+  Future uploadImage() async {
+    String fileName = const Uuid().v1();
+    var ref = FirebaseStorage.instance.ref().child('images').child("$fileName.jpg");
+    var uploadTask = await ref.putFile(imageFile!);
+    String imageUrl = await uploadTask.ref.getDownloadURL();
+    ChatMessageModel message = ChatMessageModel(date: DateTime.now(), type: 'img', message: imageUrl);
+    _cloudService.sendMessage(
+        widget.currentUserId,
+        widget.recipientId,
+        message
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,8 +84,8 @@ class _MessageInputFieldState extends State<MessageInputField>{
                 cursorColor: primaryColor,
                 controller: _controller,
                 decoration: InputDecoration(
-                    hintText: 'type your message',
-                    fillColor: backgroundColor,
+                    hintText: 'type your message'.toUpperCase(),
+                    fillColor: CupertinoColors.white,
                     filled: true,
                     prefixIcon: IconButton(
                         onPressed: () {
@@ -55,6 +98,7 @@ class _MessageInputFieldState extends State<MessageInputField>{
                         icon: Icon(
                           Icons.add_box_rounded,
                           color: primaryColor,
+                          size: 30,
                         ))
                 ),
               ),
@@ -63,11 +107,11 @@ class _MessageInputFieldState extends State<MessageInputField>{
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: () async{
+                  ChatMessageModel message = ChatMessageModel(date: DateTime.now(), type: 'text', message: _controller.text);
                   _cloudService.sendMessage(
                       widget.currentUserId,
                       widget.recipientId,
-                      _controller.text,
-                      'text'
+                      message
                   );
                   _controller.clear();
                 },
@@ -86,11 +130,8 @@ class _MessageInputFieldState extends State<MessageInputField>{
   }
 
   Widget _bottomSheet(){
-    return Container(
-      color: backgroundColor,
-      height: MediaQuery.of(context).size.height * 0.2,
-      width: double.infinity,
-      child: Card(
+    return Card(
+        color: CupertinoColors.white,
         margin: const EdgeInsets.all(18),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Row(
@@ -98,27 +139,30 @@ class _MessageInputFieldState extends State<MessageInputField>{
           children: [
             _chatsIcon(Icons.location_pin, "LOCATION", () async {
               String? messageBody = await _locationService.getOnMap();
+              ChatMessageModel message = ChatMessageModel(date: DateTime.now(), type: 'link', message: messageBody);
               if(messageBody != null){
                 _cloudService.sendMessage(
                     widget.currentUserId,
                     widget.recipientId,
-                    messageBody,
-                    'link'
+                    message
                 );
               }else{
                 Fluttertoast.showToast(
                     msg: "enable define location");
               }
             }),
-            _chatsIcon(Icons.camera_alt, "CAMERA", (){}),
-            _chatsIcon(Icons.photo, "PHOTO", (){}),
+            _chatsIcon(Icons.camera_alt, "CAMERA", () async{
+              await getImageFromCamera();
+            }),
+            _chatsIcon(Icons.photo, "PHOTO", () async{
+              await getImage();
+            }),
           ],
         ),
-      ),
-    );
+      );
   }
 
-  _chatsIcon(IconData icons, String title, VoidCallback onTap) {
+  Widget _chatsIcon(IconData icons, String title, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Column(
@@ -127,9 +171,10 @@ class _MessageInputFieldState extends State<MessageInputField>{
           CircleAvatar(
             radius: 30,
             backgroundColor: primaryColor,
-            child: Icon(icons),
+            child: Icon(icons, size: 27,),
           ),
-          Text(title)
+          SizedBox(height: 15,),
+          Text(title, style: GoogleFonts.firaCode(fontSize: 17, color: Colors.black),)
         ],
       ),
     );

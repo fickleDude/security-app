@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -128,16 +129,21 @@ class MyApp extends StatelessWidget {
             labelMedium: GoogleFonts.firaCode(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold),
             labelSmall: GoogleFonts.firaCode(fontSize: 11, color: primaryColor),
             //for messages in chat
-            bodySmall:GoogleFonts.firaCode(fontSize: 11, color: defaultColor),
+            bodySmall:GoogleFonts.firaCode(fontSize: 11, color: CupertinoColors.white),
             bodyMedium: GoogleFonts.firaCode(fontSize: 18, color: backgroundColor,fontWeight: FontWeight.bold),
           ),
           primaryTextTheme: TextTheme(
             //label in text field
             labelMedium: GoogleFonts.firaCode(color: defaultColor),
             //section titles on home screen
-            titleMedium: GoogleFonts.firaCode(fontSize: 20, color: primaryColor, fontWeight: FontWeight.bold),
+            titleMedium: GoogleFonts.firaCode(fontSize: 20, color: backgroundColor,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2),
             //app bar title
-            titleLarge: GoogleFonts.firaCode(fontSize: 40, color: backgroundColor, fontWeight: FontWeight.bold),
+            titleLarge: GoogleFonts.firaCode(fontSize: 40, color: backgroundColor, fontWeight: FontWeight.bold,
+                letterSpacing: 2),
+            labelSmall: GoogleFonts.firaCode(fontSize: 20, color: primaryColor, fontWeight: FontWeight.bold,
+                letterSpacing: 2),
 
           ),
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -147,3 +153,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+

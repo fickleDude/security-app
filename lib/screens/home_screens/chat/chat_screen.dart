@@ -33,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen>{
     return Scaffold(
         appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Text(widget.recipient.name!, style: context.prT1,),
+        title: Text(widget.recipient.name!.toUpperCase(), style: context.prT1,),
       ),
         body: Column(
           children: [
@@ -48,8 +48,8 @@ class _ChatScreenState extends State<ChatScreen>{
                       if(snapshot.data!.docs.isEmpty){
                         return Center(
                             child: Text(
-                                "TALK WITH ${widget.recipient.name}",
-                                style: context.prT2
+                                "TALK WITH ${widget.recipient.name?.toUpperCase()}",
+                                style: context.prL2
                             ),
                         );
                       }
@@ -57,15 +57,20 @@ class _ChatScreenState extends State<ChatScreen>{
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (BuildContext context, int index){
                             final data = snapshot.data!.docs[index];
-                            bool isMe = data['senderId'] == widget.currentUser.uid;
-                            String type = data['type'];
-                            return SingleMessage(
-                              message: data['message'],
-                              date: data['date'],
-                              isMe: isMe,
-                              recipientName: widget.recipient.name,
-                              userName: widget.currentUser.displayName,
-                              type: type,
+                            return Dismissible(
+                              key: UniqueKey(),
+                              onDismissed: (direction) async{
+                                await _cloudService.deleteMessage(widget.currentUser.uid,
+                                    widget.recipient.id!, data.id);
+                              },
+                              child: SingleMessage(
+                                message: data['message'],
+                                date: data['date'],
+                                isMe: data['isMe'],
+                                recipientName: widget.recipient.name,
+                                userName: widget.currentUser.displayName,
+                                type: data['type'],
+                              ),
                             );
                           }
                       );
@@ -83,5 +88,4 @@ class _ChatScreenState extends State<ChatScreen>{
         ),
     );
   }
-
 }
