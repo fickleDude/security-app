@@ -75,7 +75,7 @@ class _CustomerSliderItem extends StatelessWidget{
             ),
           ),
         ),
-        Text(title, style: context.l2,)
+        Text(title, )
       ],
 
     );

@@ -15,8 +15,7 @@ class ExploreWidget extends StatelessWidget{
         Padding(
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
             child: Text(
-                "EXPLORE",
-                style: context.prT2)
+                "EXPLORE",)
         ),
         CustomSlider(
             articleImage: articleImages,

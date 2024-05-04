@@ -4,19 +4,15 @@ import 'package:flutter/material.dart';
 
 
 extension UIThemeExtension on BuildContext {
+  TextStyle? get titleAccent => Theme.of(this).textTheme.headlineLarge;
+  TextStyle? get titlePrimary => Theme.of(this).textTheme.headlineMedium;
+  TextStyle? get titleBackground => Theme.of(this).textTheme.headlineSmall;
 
-  //DEFAULT
-  TextStyle? get t1 => Theme.of(this).textTheme.titleLarge;
+  TextStyle? get subtitleAccent => Theme.of(this).textTheme.titleLarge;
+  TextStyle? get subtitlePrimary => Theme.of(this).textTheme.titleMedium;
+  TextStyle? get subtitleBackground => Theme.of(this).textTheme.titleSmall;
 
-  TextStyle? get l1 => Theme.of(this).textTheme.labelLarge;
-  TextStyle? get l2 => Theme.of(this).textTheme.labelMedium;
-  TextStyle? get l3 => Theme.of(this).textTheme.labelSmall;
-  TextStyle? get b2 => Theme.of(this).textTheme.bodyMedium;
-  TextStyle? get b3 => Theme.of(this).textTheme.bodySmall;
-  //PRIMARY
-  TextStyle? get prL1 => Theme.of(this).primaryTextTheme.labelMedium;
-  TextStyle? get prT2 => Theme.of(this).primaryTextTheme.titleMedium;
-  TextStyle? get prT1 => Theme.of(this).primaryTextTheme.titleLarge;
-  TextStyle? get prL2 => Theme.of(this).primaryTextTheme.labelSmall;
-  //ACCENT
+  TextStyle? get bodyAccent => Theme.of(this).textTheme.bodyLarge;
+  TextStyle? get bodyPrimary => Theme.of(this).textTheme.bodyMedium;
+  TextStyle? get bodyBackground => Theme.of(this).textTheme.bodySmall;
 }

@@ -40,50 +40,54 @@ class CustomTextField extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: initialValue,
-      onChanged: onChange,
-      validator: onValidate,
-      enabled: enable == true ? true : enable,
-      controller: controller,
-      textInputAction: inputAction,
-      focusNode: focusNode,
-      maxLines: maxLines ?? 1,
-      keyboardType: keyboardType ?? TextInputType.name,
-      onSaved: onSave,
-      obscureText: isPassword == false ? false : isPassword,
-      decoration: InputDecoration(
-        labelText: hintText ?? 'hint text...',
-        labelStyle: context.prL1,
-        prefixIcon: prefix,
-        suffixIcon: suffix,
-        focusedBorder: OutlineInputBorder(
-         borderRadius: BorderRadius.circular(30),
-         borderSide:  BorderSide(
-           style: BorderStyle.solid,
-           color: defaultColor
-         )
-        ),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide:  BorderSide(
-                style: BorderStyle.solid,
-                color: primaryColor
-            )
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide:  BorderSide(
-                style: BorderStyle.solid,
-                color: defaultColor
-            )
-        ),
-        errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide:  BorderSide(
-                style: BorderStyle.solid,
-                color: primaryColor
-            )
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        initialValue: initialValue,
+        onChanged: onChange,
+        validator: onValidate,
+        enabled: enable == true ? true : enable,
+        controller: controller,
+        textInputAction: inputAction,
+        focusNode: focusNode,
+        maxLines: maxLines ?? 1,
+        keyboardType: keyboardType ?? TextInputType.name,
+        onSaved: onSave,
+        obscureText: isPassword == false ? false : isPassword,
+        decoration: InputDecoration(
+          labelText: hintText ?? 'hint text...',
+          fillColor: primaryColor,
+          // labelStyle: context.medium,
+          prefixIcon: prefix,
+          suffixIcon: suffix,
+          focusedBorder: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(30),
+           borderSide:  BorderSide(
+             style: BorderStyle.solid,
+             color: backgroundColor
+           )
+          ),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide:  BorderSide(
+                  style: BorderStyle.solid,
+                  color: backgroundColor
+              )
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide:  BorderSide(
+                  style: BorderStyle.solid,
+                  color: backgroundColor
+              )
+          ),
+          errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide:  BorderSide(
+                  style: BorderStyle.solid,
+                  color: backgroundColor
+              )
+          ),
         ),
       ),
     );

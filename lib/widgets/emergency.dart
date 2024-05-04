@@ -11,47 +11,30 @@ class EmergencyWidget extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      scrollDirection: Axis.horizontal,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-            child: Text('EMERGENCY',style: context.prT2)
+        _EmergencyCard(
+            number: "102",
+            image: 'assets/police.png',
+            title: "полиция"
         ),
-        SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: 180,
-          child: ListView(
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            children: [
-              //police
-              _EmergencyCard(
-                  number: "002",
-                  assetImage: 'assets/icons/alert.png',
-                  title: "Police",
-                  subtitle: "Call 0-0-2 for emergencies."),
-              //ambulance
-              _EmergencyCard(
-                  number: "003",
-                  assetImage: 'assets/ambulance.png',
-                  title: "Ambulance",
-                  subtitle: "Call 0-0-3 for ambulance."),
-              //fire
-              _EmergencyCard(
-                  number: "001",
-                  assetImage: 'assets/flame.png',
-                  title: "Fire-brigade",
-                  subtitle: "Call 0-0-1 for flames."),
-              //terrorism
-              _EmergencyCard(
-                  number: "112",
-                  assetImage: 'assets/army.png',
-                  title: "Army Emergency",
-                  subtitle: "Call 1-1-2 for national terrorism authority."),
-            ],
-          ),
-        )
+        _EmergencyCard(
+            number: "102",
+            image: 'assets/police.png',
+            title: "полиция"
+        ),
+        _EmergencyCard(
+            number: "102",
+            image: 'assets/police.png',
+            title: "полиция"
+        ),
+        _EmergencyCard(
+            number: "102",
+            image: 'assets/police.png',
+            title: "полиция"
+        ),
       ],
     );
   }
@@ -61,104 +44,58 @@ class EmergencyWidget extends StatelessWidget{
 class _EmergencyCard extends StatelessWidget{
 
   String number;
-  String assetImage;
+  String image;
   String title;
-  String subtitle;
 
   _EmergencyCard({
     required this.number,
-    required this.assetImage,
+    required this.image,
     required this.title,
-    required this.subtitle
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10.0, bottom: 5),
-      child: Card(
-        elevation: 5,
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    return InkWell(
+      onTap: ()=>_callNumber(),
+      child: Stack(children: [
+        Card(
+        color: primaryColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(30),
         ),
-        child: InkWell(
-          onTap: ()=>_callNumber(),
-          child: Container(
-            height: 180,
-            width: MediaQuery.of(context).size.width * 0.7,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  gradientColorDark,
-                  primaryColor,
-                  gradientColorBright,
-                ],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                      backgroundColor: Colors.white.withOpacity(0.5),
-                      radius: 25,
-                      child: Center(
-                          child: Image(
-                            image: AssetImage(assetImage),
-                            height: 35,
-                          )
-                      )
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                              color: backgroundColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: MediaQuery.of(context).size.width * 0.06),
-                        ),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                              color: backgroundColor,
-                              fontSize: MediaQuery.of(context).size.width * 0.035
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Container(
-                          height: 30,
-                          width: 80,
-                          decoration: BoxDecoration(
-                              color: backgroundColor,
-                              borderRadius: BorderRadius.circular(300)),
-                          child: Center(
-                            child: Text(
-                              number.split('').join('-'),
-                              style: TextStyle(
-                                  color: gradientColorBright,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          height: height/6,
+          width: width/1.5,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Text(title, style: context.subtitleAccent,),
+              SizedBox(height: height/70,),
+              Text("если вам нужна", style: context.bodyBackground),
+              Text("помощь, звоните", style: context.bodyBackground),
+              SizedBox(height: height/70,),
+              Text(number, style: context.subtitleAccent),
+            ],),
           ),
         ),
       ),
+       Container(
+         margin: const EdgeInsets.only(left: 150, top: 30),
+         child: Image(
+            image: AssetImage(image),
+            height: height/5,
+          ),
+       ),
+      ],
+      ),
     );
+
   }
 
   _callNumber() async {
