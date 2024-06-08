@@ -36,5 +36,5 @@ user
   
 [Link to UML diagram](https://drive.google.com/file/d/1mJMueLEqxxkPtovZhg-Vg_j6FbydRfBU/view?usp=sharing)
 ## UI
-![Alt Text]([https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif](https://drive.google.com/file/d/1kJK1b_6Y8HWJs07kKUjDw8loAcMV6buX/view?usp=sharing))
+<video src="https://drive.google.com/file/d/1kJK1b_6Y8HWJs07kKUjDw8loAcMV6buX/view?usp=sharing" width="442" height="920" />
 ## Get APK
