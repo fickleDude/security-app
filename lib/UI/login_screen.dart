@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/UI/splash_screen.dart';
 import 'package:safety_app/UI/widgets/custom_button.dart';
 import 'package:safety_app/UI/widgets/text_field_widget.dart';
-import 'package:safety_app/components/custom_text_field.dart';
 import 'package:safety_app/logic/handlers/text_field_input_handler.dart';
-import 'package:safety_app/logic/services/cloud_storage_service.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
-import 'package:safety_app/validators/validator.dart';
+import 'package:safety_app/utils/validator.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../logic/handlers/auth_ecxeption_handler.dart';
 import '../logic/providers/user_provider.dart';
-import '../validators/form_validator_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -145,7 +142,6 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
   //LOGIC
   void _login() async{
     //UPDATE FORM DATA MAP
-    // _formKey.currentState!.save();
     if(_formKey.currentState!.validate()){
       //SET LOADING STATE
       setState(() { isLoading = true; });
@@ -155,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> with Validator{
       ).then((value){
         setState(() { isLoading = false; });
         if(!value){
-          dialog(context, AuthExceptionHandler
+          Fluttertoast.showToast(msg: AuthExceptionHandler
               .generateErrorMessage(Provider.of<UserProvider>(context, listen: false).status));
         }
       });

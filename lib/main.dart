@@ -1,20 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:safety_app/UI/menu/contacts/contacts_screen.dart';
 import 'package:safety_app/UI/menu/contacts/phone_book_screen.dart';
-import 'package:safety_app/UI/menu/settings_screen.dart';
-import 'package:safety_app/UI/menu_screen.dart';
-import 'package:safety_app/logic/providers/menu_provider.dart';
+import 'package:safety_app/domain/chat_recipient_model.dart';
 import 'package:safety_app/logic/providers/permission_provider.dart';
 import 'package:safety_app/logic/providers/user_provider.dart';
-import 'package:safety_app/logic/repositories/emergency_contact_repository.dart';
 import 'package:safety_app/utils/constants.dart';
 
+import 'UI/menu/chat/chat_screen.dart';
+import 'UI/menu/chat/messenger_screen.dart';
 import 'UI/menu/home_screen.dart';
 import 'UI/login_screen.dart';
 import 'UI/menu/profile_screen.dart';
@@ -22,17 +19,16 @@ import 'UI/onboard_screen.dart';
 import 'UI/register_screen.dart';
 import 'UI/splash_screen.dart';
 import 'logic/handlers/auth_ecxeption_handler.dart';
-import 'logic/services/emergency_contact_service.dart';
 
 import 'locator.dart' as di;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp().then((value) => print(value.options.projectId));
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-GoRouter router(String initialLocation, String? uid) {
+GoRouter router(String initialLocation) {
   return GoRouter(
     initialLocation: initialLocation,
     routes: [
@@ -56,16 +52,11 @@ GoRouter router(String initialLocation, String? uid) {
       ),
       GoRoute(
           path: '/home',
-          //builder: (context, state) => const MenuScreen(),
-          builder: (context, state)=>HomeScreen(uid: uid!,),
+          builder: (context, state)=>HomeScreen(),
           routes: [
             GoRoute(
               path: 'profile',
               builder: (context, state) => const ProfileScreen(),
-            ), 
-            GoRoute(
-              path: 'settings',
-              builder: (context, state) => const SettingsScreen(),
             ),
             GoRoute(
               path: 'contacts',
@@ -77,21 +68,20 @@ GoRouter router(String initialLocation, String? uid) {
                 )
               ]
             ),
-            // GoRoute(
-            //   path: 'messenger',
-            //   builder: (context, state) => const MessengerScreen(),
-            //   routes: [
-            //     GoRoute(
-            //       path: 'chat',
-            //       name: 'chat',
-            //       builder: (context, state){
-            //         AppUserModel? recipient = state.extra as AppUserModel?; //casting is important
-            //         return ChatScreen(recipient: recipient!,);
-            //       },
-            //     ),
-            //   ]
-            // ),
-
+            GoRoute(
+              path: 'messenger',
+              builder: (context, state) => const MessengerScreen(),
+              routes: [
+                GoRoute(
+                  path: 'chat',
+                  name: 'chat',
+                  builder: (context, state){
+                    ChatRecipientModel? recipient = state.extra as ChatRecipientModel?; //casting is important
+                    return ChatScreen(recipient: recipient!,);
+                  },
+                ),
+              ]
+            ),
           ]
       ),
 
@@ -113,24 +103,24 @@ class MyApp extends StatelessWidget {
             builder: (context, user, _) {
           switch(user.status){
             case AuthStatus.uninitialized:
-              return appSetUp('/welcome', null);
+              return appSetUp('/welcome');
             case AuthStatus.unauthenticated:
             case AuthStatus.authenticating:
-              return appSetUp('/welcome/login', null);
+              return appSetUp('/welcome/login');
             case AuthStatus.authenticated:
-              di.init(user.user!.uid);
-              return appSetUp('/home', user.user!.uid);
+              di.init(user.user!);
+              return appSetUp('/home');
             default:
-              return appSetUp('/splash', null);
+              return appSetUp('/splash');
           }
         }
       )
     );
   }
 
-  Widget appSetUp(String initialLocation, String? uid){
+  Widget appSetUp(String initialLocation){
     return MaterialApp.router(
-        title: 'SAFETY APP',
+        title: 'CALL GALYA',
         theme: ThemeData(
           textTheme: TextTheme(
               //title
@@ -149,7 +139,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           useMaterial3: true,
         ),
-        routerConfig: router(initialLocation, uid)
+        routerConfig: router(initialLocation),
     );
   }
 }

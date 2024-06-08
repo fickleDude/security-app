@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/UI/widgets/contact_widget.dart';
-import 'package:safety_app/domain/contact_model.dart';
+import 'package:safety_app/UI/widgets/list_widget.dart';
+import 'package:safety_app/domain/emergency_contact_model.dart';
 import 'package:safety_app/logic/handlers/permission_ecxeption_handler.dart';
-import 'package:safety_app/logic/providers/menu_provider.dart';
 import 'package:safety_app/logic/services/emergency_contact_service.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
+import '../../../locator.dart';
 import '../../../logic/providers/permission_provider.dart';
 import '../../../logic/providers/emergency_contact_provider.dart';
 import '../../../utils/constants.dart';
@@ -35,47 +35,53 @@ class _PhoneBookScreenState extends State<PhoneBookScreen> {
                 .then((value) => setState((){
               phoneBook = value;
             }));
-            return Scaffold(
-              appBar: CustomAppBar(
-                title: "телефоны",
-                titleStyle: context.titlePrimary!,
-                color: accentColor,
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back,size: 40,color: primaryColor,weight: 80,),
-                  onPressed: () {
-                    context.go("/home/contacts");
-                  },
+            return ChangeNotifierProvider(
+              create: (_) => EmergencyContactProvider(locator<EmergencyContactService>()),
+              child:
+              Scaffold(
+                appBar: CustomAppBar(
+                  title: "телефоны",
+                  titleStyle: context.titlePrimary!,
+                  color: accentColor,
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back,size: 40,color: primaryColor,weight: 80,),
+                    onPressed: () {
+                      context.go("/home/contacts");
+                    },
+                  ),
                 ),
-              ),
-              body: Stack(
-                  children:[
-                    Container(
-                      decoration: BoxDecoration(
-                        color: fillColor,
-                        image: const DecorationImage(
-                          image: AssetImage("assets/phone.png"),
-                          fit: BoxFit.cover,
+                body: Stack(
+                    children:[
+                      Container(
+                        decoration: BoxDecoration(
+                          color: fillColor,
+                          image: const DecorationImage(
+                            image: AssetImage("assets/phone.png"),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    ),
-                    ListView.builder(
-                      itemCount: phoneBook.length,
-                      itemBuilder: (BuildContext context, int index){
-                        var phone = phoneBook[index];
-                        final String number = phone.phones!.elementAt(0).value!;
-                        final String name = phone.displayName!;
-                        return ContactWidget(
-                          contact: EmergencyContact(number:number,name:name),
-                          onTap: (){
-                            Provider.of<EmergencyContactProvider>(context, listen: false)
-                                .addContact(EmergencyContact(number: number, name: name));
-                            context.go("/home/contacts");
-                          },
-                        );
-                      },
-                    ),
-                  ]
+                      ListView.builder(
+                        itemCount: phoneBook.length,
+                        itemBuilder: (BuildContext context, int index){
+                          var phone = phoneBook[index];
+                          final String number = phone.phones!.elementAt(0).value!;
+                          final String name = phone.displayName!;
+                          return ListWidget(
+                            index: index,
+                            label: name,
+                            tailing: Icon(Icons.call, size: 25,color: accentColor,),
+                            onTap: (){
+                              Provider.of<EmergencyContactProvider>(context, listen: false)
+                                  .addContact(EmergencyContact(number: number, name: name));
+                              context.go("/home/contacts");
+                            },
+                          );
+                        },
+                      ),
+                    ]
 
+                ),
               ),
             );
           }

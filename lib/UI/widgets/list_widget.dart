@@ -1,21 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/domain/contact_model.dart';
+import 'package:safety_app/domain/emergency_contact_model.dart';
 import 'package:safety_app/logic/providers/emergency_contact_provider.dart';
 import 'package:safety_app/logic/providers/user_provider.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
 import '../../utils/constants.dart';
 
-class ContactWidget extends StatelessWidget{
-  EmergencyContact contact;
+class ListWidget extends StatelessWidget{
   void Function(DismissUpdateDetails)? onUpdate;
   void Function()? onTap;
 
-  ContactWidget({
+  String label;
+  Icon tailing;
+  int index;
+
+  ListWidget({
     super.key,
-    required this.contact,
+    required this.label,
+    required this.tailing,
+    required this.index,
     this.onUpdate,
     this.onTap
   });
@@ -29,16 +34,25 @@ class ContactWidget extends StatelessWidget{
         color: primaryColor,
         borderRadius: BorderRadius.circular(90),
       ),
+      // child: InkWell(
+      //   onTap: onTap,
+      //   child:ListTile(
+      //     trailing: tailing,
+      //     title: Text(label, style: context.subtitleAccent,),
+      //   ),
+      // ),
       child: Dismissible(
-        key: UniqueKey(),
-        child: InkWell(
-          child:ListTile(
-            trailing: Icon(Icons.call, size: 25,color: accentColor,),
-            title: Text(contact.name!, style: context.subtitleAccent,),
-          ),
-          onTap: onTap,
-        ),
+        // key: UniqueKey(),
+        key: ValueKey<int>(index),
         onUpdate: onUpdate,
+        child:
+        InkWell(
+          onTap: onTap,
+          child:ListTile(
+            trailing: tailing,
+            title: Text(label, style: context.subtitleAccent,),
+          ),
+        ),
       ),
     );
   }

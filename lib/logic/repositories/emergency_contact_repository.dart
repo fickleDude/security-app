@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:safety_app/locator.dart';
 
-import '../../domain/contact_model.dart';
+import '../../domain/emergency_contact_model.dart';
 
 abstract class ContactRepository {
   Stream<List<EmergencyContact>> getContacts();
@@ -13,6 +15,8 @@ abstract class ContactRepository {
 class EmergencyContactRepository implements ContactRepository {
   final String uid;
   EmergencyContactRepository({required this.uid});
+
+  // FirebaseFirestore db = locator;
 
   @override
   Stream<List<EmergencyContact>> getContacts() {

@@ -5,13 +5,13 @@ class TextFieldInputHandler {
   }
 
   static bool isValidName(String value){
-    final nameRegExp = RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$");
+    final nameRegExp = RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))*[A-Za-z]+\.?\s*$");
     return nameRegExp.hasMatch(value);
   }
 
   static bool isValidPassword(String value){
     final passwordRegExp =
-    RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\><*~]).{8,}/pre>');
+    RegExp(r'^(?=.*?[A-Z])(?=.*?[@a-z])(?=.*?[0-9])(?=.*?[!@#\><*~]).{8,}');
     return passwordRegExp.hasMatch(value);
   }
 

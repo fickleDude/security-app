@@ -1,17 +1,14 @@
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/UI/splash_screen.dart';
-import 'package:safety_app/UI/widgets/contact_widget.dart';
+import 'package:safety_app/UI/widgets/list_widget.dart';
 import 'package:safety_app/UI/widgets/custom_app_bar_widget.dart';
-import 'package:safety_app/domain/contact_model.dart';
+import 'package:safety_app/domain/emergency_contact_model.dart';
 import 'package:safety_app/locator.dart';
 import 'package:safety_app/logic/providers/emergency_contact_provider.dart';
 import 'package:safety_app/utils/constants.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
-import '../../../logic/providers/menu_provider.dart';
 import '../../../logic/services/emergency_contact_service.dart';
 
 class ContactsScreen extends StatelessWidget {
@@ -21,10 +18,17 @@ class ContactsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
         create: (_) => EmergencyContactProvider(locator<EmergencyContactService>()),
-        child: Scaffold(
+         child:
+        Scaffold(
             appBar: CustomAppBar(
               title: "контакты",
               titleStyle: context.titleAccent!,
+              leading:IconButton(
+                icon: Icon(Icons.arrow_back,size: 40,color: accentColor,weight: 80,),
+                onPressed: () {
+                  context.go("/home");
+                },
+              ),
               actions: [
                 IconButton(
                   icon: Icon(Icons.add,size: 40,color: accentColor,weight: 80,),
@@ -40,7 +44,7 @@ class ContactsScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: fillColor,
                     image: const DecorationImage(
-                      image: AssetImage("assets/fly_cut.png"),
+                      image: AssetImage("assets/contacts.png"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -58,16 +62,19 @@ class ContactsScreen extends StatelessWidget {
                                 var list = snapshot.data;
                                 return ListView.builder(
                                   itemCount: list?.length,
-                                  itemBuilder: (context, i) => ContactWidget(
-                                    contact: list![i],
-                                    onUpdate: (details)=>provider.deleteContact(list![i]),
+                                  itemBuilder: (context, i) => ListWidget(
+                                    index: i,
+                                    label: list![i].name!,
+                                    tailing: Icon(Icons.call, size: 25,color: accentColor,),
+                                    onUpdate: (details)=>provider.deleteContact(list[i]),
                                   ),
                                 );
                               }
                               else{
-                                return const Center(
+                                return Center(
                                   child: Text(
                                     "нет контактов",
+                                    style: context.subtitlePrimary,
                                   ),
                                 );
                               }
@@ -78,7 +85,6 @@ class ContactsScreen extends StatelessWidget {
                   ),
               ],
             )
-
         ),
     );
 

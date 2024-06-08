@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/logic/services/cloud_storage_service.dart';
-import 'package:safety_app/validators/validator.dart';
+import 'package:safety_app/utils/validator.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
-import '../../components/custom_text_field.dart';
 import '../../logic/handlers/auth_ecxeption_handler.dart';
 import '../../logic/handlers/text_field_input_handler.dart';
 import '../../logic/providers/user_provider.dart';
 import '../../utils/constants.dart';
-import '../../validators/form_validator_cubit.dart';
 import '../splash_screen.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/text_field_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileScreen extends StatefulWidget{
   const ProfileScreen({super.key});
@@ -66,28 +63,29 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         CustomFormTextField(
-                          hintText: "имя",
+                          hintText: _formData["name"],
                           prefix: const Icon(Icons.person, size: 25, weight: 80,),
                           onChange: (name){
                             _formData.update("name", (value) => name ?? "");
                           },
                           validator: (name){
-                            if (name == null || name.isEmpty
-                                || !TextFieldInputHandler.isValidName(name)) {
-                              return 'Неверно введено имя';
+                            if (name == null || name.isEmpty) {
+                              return 'Введите имя';
                             }
                             return null;
                           },
                         ),
                         CustomFormTextField(
-                          hintText: "почта",
-                          prefix: const Icon(Icons.person, size: 25, weight: 80,),
+                          hintText:  _formData['email'],
+                          prefix: const Icon(Icons.email, size: 25, weight: 80,),
                           onChange: (email){
                             _formData.update("email", (value) => email ?? "");
                           },
                           validator: (email){
                             if (email == null || email.isEmpty
                                 || !TextFieldInputHandler.isValidEmail(email)) {
+                              return 'Введите почту';
+                            } else if (!TextFieldInputHandler.isValidEmail(email)) {
                               return 'Неверно введена почта';
                             }
                             return null;
@@ -105,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
                     },
                     color: backgroundColor,
                     labelStyle: context.subtitlePrimary!,
-                    width: 150,
+                    width: 170,
                   ),
                   SizedBox(height: height/10,),
                   Row(
@@ -151,10 +149,12 @@ class _ProfileScreenState extends State<ProfileScreen> with Validator{
           isLoading = false;
         });
         if (!value) {
-          dialog(context, AuthExceptionHandler
+          Fluttertoast.showToast(msg: AuthExceptionHandler
               .generateErrorMessage(Provider
               .of<UserProvider>(context, listen: false)
               .status));
+        }else{
+          Fluttertoast.showToast(msg: "Профиль обновлен");
         }
       });
     }

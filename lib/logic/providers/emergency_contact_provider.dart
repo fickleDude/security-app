@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:safety_app/logic/services/emergency_contact_service.dart';
-import '../../domain/contact_model.dart';
+import '../../domain/emergency_contact_model.dart';
 
 class EmergencyContactProvider extends ChangeNotifier{
   late final EmergencyContactService _contactService;

@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:safety_app/logic/handlers/auth_ecxeption_handler.dart';
+
+import '../../domain/emergency_user_model.dart';
 
 class UserProvider with ChangeNotifier {
   FirebaseAuth? _auth;
@@ -36,6 +39,7 @@ class UserProvider with ChangeNotifier {
       if(email.isNotEmpty){
         await user?.updateEmail(email);
       }
+      notifyListeners();
       return true;
     } on  FirebaseAuthException catch (e) {
       _status = AuthExceptionHandler.handleAuthException(e);
@@ -51,6 +55,16 @@ class UserProvider with ChangeNotifier {
       );
       userCredential.user?.updateDisplayName(name);
       _status = AuthStatus.unauthenticated;
+
+      EmergencyUser value = EmergencyUser(id: user?.uid,email: email, name: name);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .withConverter(
+        fromFirestore: EmergencyUser.fromFirestore,
+        toFirestore: (EmergencyUser value, options) => value.toFirestore(),
+      )
+          .doc(_user?.uid)
+          .set(value);
       return true;
     } on FirebaseAuthException catch (e) {
       _status = AuthExceptionHandler.handleAuthException(e);

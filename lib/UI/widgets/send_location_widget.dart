@@ -10,6 +10,7 @@ import 'package:safety_app/UI/widgets/custom_button.dart';
 import 'package:safety_app/logic/services/location_service.dart';
 import 'package:safety_app/utils/ui_theme_extension.dart';
 
+import '../../locator.dart';
 import '../../logic/providers/permission_provider.dart';
 import '../../logic/services/emergency_contact_service.dart';
 import '../../utils/constants.dart';
@@ -23,6 +24,7 @@ class SendLocation extends StatefulWidget {
 
 class _SendLocationState extends State<SendLocation> {
   LocationService locationService = LocationService();
+  EmergencyContactService contactService = locator();
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +108,7 @@ class _SendLocationState extends State<SendLocation> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Center(child: Text(address, style: context.subtitleAccent)),
+                          Center(child: Text(address, style: context.subtitleBackground)),
                           CustomButton(
                               label: "отправить",
                               onPressed: !isGranted ? null : ()=>sendSms(),
@@ -123,17 +125,18 @@ class _SendLocationState extends State<SendLocation> {
 
   sendSms() async{
       await locationService.getOnMap().then((link) => {
-      Provider.of<EmergencyContactService>(context, listen: false)
+      contactService
           .getContacts()
           .forEach((element) async {
       for (var element in element) {
         try{
-          await BackgroundSms.sendMessage(
-              phoneNumber: element.number!,
-              message: "i am in trouble ${link}",
-              simSlot: 1
-          );
-          Fluttertoast.showToast(msg: "сообщение отправлено");
+          // await BackgroundSms.sendMessage(
+          //     phoneNumber: element.number!,
+          //     message: "i am in trouble ${link}",
+          //     simSlot: 1
+          // );
+          dialog(context, "сообщение отправлено");
+          //Fluttertoast.showToast(msg: "сообщение отправлено");
         }catch(e){
           Fluttertoast.showToast(msg: "не получается отправить сообщение");
         }

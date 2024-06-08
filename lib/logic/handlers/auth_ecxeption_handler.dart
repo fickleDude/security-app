@@ -45,7 +45,7 @@ class AuthExceptionHandler {
         errorMessage = "Your password should be at least 6 characters.";
         break;
       case AuthStatus.wrongPassword:
-        errorMessage = "Your email or password is wrong.";
+        errorMessage = "Неверно введен пароль.";
         break;
       case AuthStatus.emailAlreadyExists:
         errorMessage =

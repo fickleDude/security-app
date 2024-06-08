@@ -1,4 +1,4 @@
-import '../../domain/contact_model.dart';
+import '../../domain/emergency_contact_model.dart';
 import '../repositories/emergency_contact_repository.dart';
 
 class EmergencyContactService {
