@@ -1,16 +1,29 @@
-# safety_app
+# CALL GALYA
+Imagine you a parent and your child is big enough to go out alone, but you still worried about his safety when he commutes to school. Or your elderly mother starts to forget things and does not feel secure from time to time. Or you met someone on a dating app and we will finally arrange a date, but you still feel concerned to go out with total stranger. In all these and variety of other cases CALL GALYA can help you.
 
-A new Flutter project.
+Application created to provide personal safety in everyday life and in dangerous situations. 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Data Model
+The application will store Users Profile Info, Emergency Contacts and Chat Messages in NoSql format.
+```
+user
+  contacts
+    contact
+      name
+      number
+  chats
+      chat
+        messages
+          message
+            isMe
+            date
+            message
+            type
+  id
+  name
+  email
+```
+## Architecture
+## User Cases
+## UI
+## Get APK
