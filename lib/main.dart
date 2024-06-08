@@ -1,24 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:safety_app/logic/models/user_model.dart';
-import 'package:safety_app/logic/providers/contact_list_provider.dart';
-import 'package:safety_app/screens/home_screens/add_contacts_screen.dart';
-import 'package:safety_app/screens/home_screens/chat/chat_screen.dart';
-import 'package:safety_app/screens/home_screens/messenger_screen.dart';
-import 'package:safety_app/screens/home_screens/contacts_screen.dart';
-import 'package:safety_app/screens/home_screens/home_screen.dart';
-import 'package:safety_app/screens/login_screen.dart';
-import 'package:safety_app/screens/home_screens/profile_screen.dart';
-import 'package:safety_app/screens/splash_screen.dart';
-import 'package:safety_app/screens/onboard_screen.dart';
-import 'package:safety_app/screens/register_screen.dart';
+import 'package:safety_app/UI/menu/contacts/contacts_screen.dart';
+import 'package:safety_app/UI/menu/contacts/phone_book_screen.dart';
+import 'package:safety_app/domain/chat_recipient_model.dart';
+import 'package:safety_app/logic/providers/permission_provider.dart';
+import 'package:safety_app/logic/providers/user_provider.dart';
 import 'package:safety_app/utils/constants.dart';
 
-import 'logic/providers/app_user_provider.dart';
+import 'UI/menu/chat/chat_screen.dart';
+import 'UI/menu/chat/messenger_screen.dart';
+import 'UI/menu/home_screen.dart';
+import 'UI/login_screen.dart';
+import 'UI/menu/profile_screen.dart';
+import 'UI/onboard_screen.dart';
+import 'UI/register_screen.dart';
+import 'UI/splash_screen.dart';
+import 'logic/handlers/auth_ecxeption_handler.dart';
+
+import 'locator.dart' as di;
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,12 +47,12 @@ GoRouter router(String initialLocation) {
             GoRoute(
               path: 'register',
               builder: (context, state) => const RegisterScreen(),
-            ),
+             ),
           ]
       ),
       GoRoute(
           path: '/home',
-          builder: (context, state) => const HomeScreen(),
+          builder: (context, state)=>HomeScreen(),
           routes: [
             GoRoute(
               path: 'profile',
@@ -58,11 +60,11 @@ GoRouter router(String initialLocation) {
             ),
             GoRoute(
               path: 'contacts',
-              builder: (context, state) => const AddContactsScreen(),
+              builder: (context, state) => const ContactsScreen(),
               routes: [
                 GoRoute(
-                    path: 'user_contacts',
-                    builder: (context, state) => const ContactsScreen()
+                    path: 'phonebook',
+                    builder: (context, state) => const PhoneBookScreen()
                 )
               ]
             ),
@@ -74,13 +76,12 @@ GoRouter router(String initialLocation) {
                   path: 'chat',
                   name: 'chat',
                   builder: (context, state){
-                    AppUserModel? recipient = state.extra as AppUserModel?; //casting is important
+                    ChatRecipientModel? recipient = state.extra as ChatRecipientModel?; //casting is important
                     return ChatScreen(recipient: recipient!,);
                   },
                 ),
               ]
             ),
-
           ]
       ),
 
@@ -90,27 +91,28 @@ GoRouter router(String initialLocation) {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-        ChangeNotifierProvider(create:(context) => AppUserProvider(),),
-        ChangeNotifierProvider(create:(context) => ContactsListProvider(),),
+        ChangeNotifierProvider.value(value: UserProvider.instance()),
+        ChangeNotifierProvider.value(value: PermissionProvider()),
         ],
-        builder: (context, child)=>Consumer<AppUserProvider>(builder: (context, authState, _) {
-          return FutureBuilder(
-            future: authState.login(),
-            builder: (context, snapshot) =>
-            snapshot.connectionState == ConnectionState.waiting
-                ? appSetUp('/splash')
-                : authState.isAuthorized //check if user info empty or not
-                ? appSetUp('/home/messenger')
-                : authState.displayedOnboard.isNotEmpty
-                ? appSetUp('/welcome/login')
-                : appSetUp('/welcome'),
-          );
+        builder: (context, child)=>Consumer<UserProvider>(
+            builder: (context, user, _) {
+          switch(user.status){
+            case AuthStatus.uninitialized:
+              return appSetUp('/welcome');
+            case AuthStatus.unauthenticated:
+            case AuthStatus.authenticating:
+              return appSetUp('/welcome/login');
+            case AuthStatus.authenticated:
+              di.init(user.user!);
+              return appSetUp('/home');
+            default:
+              return appSetUp('/splash');
+          }
         }
       )
     );
@@ -118,38 +120,26 @@ class MyApp extends StatelessWidget {
 
   Widget appSetUp(String initialLocation){
     return MaterialApp.router(
-        title: 'SAFETY APP',
+        title: 'CALL GALYA',
         theme: ThemeData(
           textTheme: TextTheme(
-            //screen label
-            titleLarge: GoogleFonts.firaCode(fontSize: 40, color: primaryColor, fontWeight: FontWeight.bold),
-            //button label
-            labelLarge: GoogleFonts.firaCode(fontSize: 18, color: backgroundColor),
-            //under button labels
-            labelMedium: GoogleFonts.firaCode(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold),
-            labelSmall: GoogleFonts.firaCode(fontSize: 11, color: primaryColor),
-            //for messages in chat
-            bodySmall:GoogleFonts.firaCode(fontSize: 11, color: CupertinoColors.white),
-            bodyMedium: GoogleFonts.firaCode(fontSize: 18, color: backgroundColor,fontWeight: FontWeight.bold),
+              //title
+              headlineLarge: TextStyle(fontFamily: 'TTTravels',fontSize: 36, fontWeight: FontWeight.w900, color: accentColor),
+              headlineMedium: TextStyle(fontFamily: 'TTTravels',fontSize: 36, fontWeight: FontWeight.w900, color: primaryColor),
+              headlineSmall: TextStyle(fontFamily: 'TTTravels',fontSize: 36, fontWeight: FontWeight.w900, color: backgroundColor),
+              //subtitle
+              titleLarge: TextStyle(fontFamily: 'TTTravels',fontSize: 20, fontWeight: FontWeight.w700, color: accentColor),
+              titleMedium: TextStyle(fontFamily: 'TTTravels',fontSize: 20, fontWeight: FontWeight.w700, color: primaryColor),
+              titleSmall: TextStyle(fontFamily: 'TTTravels',fontSize: 20, fontWeight: FontWeight.w700, color: backgroundColor),
+             //body
+              bodyLarge:TextStyle(fontFamily: 'TTTravels',fontSize: 15, fontWeight: FontWeight.w500, color: accentColor),
+              bodyMedium:TextStyle(fontFamily: 'TTTravels',fontSize: 15, fontWeight: FontWeight.w500, color: primaryColor),
+              bodySmall:TextStyle(fontFamily: 'TTTravels',fontSize: 15, fontWeight: FontWeight.w500, color: backgroundColor),
           ),
-          primaryTextTheme: TextTheme(
-            //label in text field
-            labelMedium: GoogleFonts.firaCode(color: defaultColor),
-            //section titles on home screen
-            titleMedium: GoogleFonts.firaCode(fontSize: 20, color: backgroundColor,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2),
-            //app bar title
-            titleLarge: GoogleFonts.firaCode(fontSize: 40, color: backgroundColor, fontWeight: FontWeight.bold,
-                letterSpacing: 2),
-            labelSmall: GoogleFonts.firaCode(fontSize: 20, color: primaryColor, fontWeight: FontWeight.bold,
-                letterSpacing: 2),
-
-          ),
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           useMaterial3: true,
         ),
-        routerConfig: router(initialLocation)
+        routerConfig: router(initialLocation),
     );
   }
 }
