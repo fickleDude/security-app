@@ -32,8 +32,9 @@ user
 + as a user, I can define my current location 
 + as a user, I can send sos sms
 + as a user, I can store urgent contact
-+ as a user, I can chat with other users  
++ as a user, I can chat with other users
+  
 [Link to UML diagram](https://drive.google.com/file/d/1mJMueLEqxxkPtovZhg-Vg_j6FbydRfBU/view?usp=sharing)
 ## UI
-
+![Alt Text]([https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif](https://drive.google.com/file/d/1kJK1b_6Y8HWJs07kKUjDw8loAcMV6buX/view?usp=sharing))
 ## Get APK
