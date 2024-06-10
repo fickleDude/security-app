@@ -35,6 +35,3 @@ user
 + as a user, I can chat with other users
   
 [Link to UML diagram](https://drive.google.com/file/d/1mJMueLEqxxkPtovZhg-Vg_j6FbydRfBU/view?usp=sharing)
-## UI
-<video src="https://drive.google.com/file/d/1kJK1b_6Y8HWJs07kKUjDw8loAcMV6buX/view?usp=sharing" width="442" height="920" />
-## Get APK
